@@ -14,8 +14,8 @@ Load('HistogramDrawer')
 #tree_name = 'events'
 
 class Process():
-    def __init__(self, name, pt='', tree_name=None ,custom_color=root.nProcesses):
-        if tree_name is None:
+    def __init__(self, name, pt='', tree_name=None ,custom_color=root.nProcesses, fromLimits=False):
+        if tree_name is None or not fromLimits:
             tree_name='events'
         self.name = name
         self.process_type = pt
@@ -251,7 +251,6 @@ class PlotUtility():
                                   xarr = xarr, 
                                   fields = (dist.name, ), 
                                   weight = weights_down)
-
         # everything is filled,  now draw the histograms!
         for dist in self.__distributions:
             if dist.name=="1":
@@ -294,7 +293,6 @@ class PlotUtility():
 
                 for t in table:
                     PInfo('plot_utility.PlotUtility.Dump', t)
-
             h_unscaled = {'data':None, 'mc':None} # used for chi2 calc
             for proc in self.__processes:
                 h = dist.histograms[proc.name]
@@ -355,7 +353,6 @@ class PlotUtility():
                 self.canvas.AddSystematic(hdown, 'hist')
                 f_out.WriteTObject(hup, hup.GetName(), "overwrite")
                 f_out.WriteTObject(hdown, hdown.GetName(), "overwrite")
-
             # output the canvas
             if dist.calc_chi2:
                 p = h_unscaled['data'].Chi2Test(h_unscaled['mc'],'UW')
@@ -368,9 +365,7 @@ class PlotUtility():
                 self.canvas.AddPlotLabel('P(#chi^{2}|NDoF)=%.3g'%(p),0.6,0.5,False,42,.04)
             self.canvas.Logy(True)
             self.canvas.Draw(outdir, dist.filename+'_logy')
-
             self.canvas.Reset(False)
-
         f_out.Close()
         f_buffer.Close()
         system('rm %s'%f_buffer_path)
